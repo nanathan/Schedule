@@ -2,17 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule | Plan your day with ease</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <div class="wrapper">
-    <div class="content">
-    </div>
+    <header class="top">
+        <div class="title">
+            <h1>Schedule</h1>
+            <p>Personal task and event management for your everyday life.</p>
+        </div>
+    </header>
+
+    <main class="content">
+        <section class="card hero-card">
+            <h2>Organize tasks, events, and routines in one place.</h2>
+            <p class="text">
+                Stay focused with a simple workflow for tracking what matters most. Schedule helps you create tasks,
+                plan upcoming events, and keep your week under control.
+            </p>
+            <div class="cta-group">
+                <a href="#" class="button primary">Get started</a>
+                <a href="#features" class="button secondary">Learn more</a>
+            </div>
+        </section>
+
+        <section class="card" id="features">
+            <h2>Why Schedule?</h2>
+            <ul class="feature-list">
+                <li>✅ Add and prioritize personal tasks quickly.</li>
+                <li>📅 Keep track of important events and deadlines.</li>
+                <li>🔔 Build a daily routine that fits your goals.</li>
+                <li>📱 Clean, responsive design for desktop and mobile.</li>
+            </ul>
+        </section>
+    </main>
 </div>
-</body>
+
 <footer>
-    <p>.</p>
+    <p>Built with Flask • Your day, planned better.</p>
 </footer>
+</body>
 </html>
