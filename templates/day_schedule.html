@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule | {{ day_label }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="wrapper">
+    <header class="top">
+        <div class="title">
+            <h1>{{ day_label }}</h1>
+            <p>{{ events|length }} events planned • {{ total_minutes }} total minutes scheduled</p>
+        </div>
+    </header>
+
+    <main class="content">
+        <section class="card">
+            <div class="day-header">
+                <h2>Daily schedule</h2>
+                <a href="{{ url_for('home') }}" class="button secondary">Back home</a>
+            </div>
+
+            <ul class="event-list" aria-label="Events for {{ day_label }}">
+                {% for event in events %}
+                <li class="event-item">
+                    <p class="event-time">Starts {{ event.start }}</p>
+                    <h3>{{ event.title }}</h3>
+                    <p class="event-duration">Duration: {{ event.duration_minutes }} minutes</p>
+                    <p class="event-notes">{{ event.notes }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p>Built with Flask • Your day, planned better.</p>
+</footer>
+</body>
+</html>

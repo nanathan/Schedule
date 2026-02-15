@@ -124,3 +124,54 @@ footer p {
     margin-bottom: 70px;
   }
 }
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.event-list {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.event-item {
+  border: 1px solid #d4dfec;
+  border-left: 6px solid #4e89ae;
+  border-radius: 10px;
+  padding: 18px 18px 16px;
+  background: #f9fbfe;
+}
+
+.event-item h3 {
+  margin: 8px 0 8px;
+  font-size: 1.1rem;
+}
+
+.event-time,
+.event-duration,
+.event-notes {
+  margin: 0;
+}
+
+.event-time {
+  color: #325270;
+  font-weight: 700;
+}
+
+.event-duration {
+  margin-top: 4px;
+  font-weight: 600;
+  color: #2e4d68;
+}
+
+.event-notes {
+  margin-top: 8px;
+  color: #34495e;
+}
