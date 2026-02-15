@@ -85,12 +85,50 @@ def home():
     return flask.render_template("index.html", **get_calendar_context(year, month))
 
 
-@app.route("/schedule/<day>")
+@app.route("/schedule/<day>", methods=["GET", "POST"])
 def day_schedule(day):
     try:
         datetime.datetime.strptime(day, "%Y-%m-%d")
     except ValueError:
         flask.abort(404)
+
+    error_message = None
+    form_values = {"title": "", "start": "", "duration_minutes": "", "notes": ""}
+
+    if flask.request.method == "POST":
+        title = flask.request.form.get("title", "").strip()
+        start = flask.request.form.get("start", "").strip()
+        duration_input = flask.request.form.get("duration_minutes", "").strip()
+        notes = flask.request.form.get("notes", "").strip()
+
+        form_values = {
+            "title": title,
+            "start": start,
+            "duration_minutes": duration_input,
+            "notes": notes,
+        }
+
+        try:
+            duration_minutes = int(duration_input)
+            if duration_minutes <= 0:
+                raise ValueError
+        except ValueError:
+            error_message = "Duration must be a positive number of minutes."
+
+        if not title or not start:
+            error_message = "Please fill in both title and start time."
+
+        if not error_message:
+            SAMPLE_SCHEDULE.setdefault(day, []).append(
+                {
+                    "title": title,
+                    "start": start,
+                    "duration_minutes": duration_minutes,
+                    "notes": notes,
+                }
+            )
+            SAMPLE_SCHEDULE[day].sort(key=lambda event: event["start"])
+            return flask.redirect(flask.url_for("day_schedule", day=day))
 
     events = SAMPLE_SCHEDULE.get(day, [])
     total_minutes = sum(event["duration_minutes"] for event in events)
@@ -100,6 +138,8 @@ def day_schedule(day):
         day_label=format_day_label(day),
         events=events,
         total_minutes=total_minutes,
+        error_message=error_message,
+        form_values=form_values,
     )
 
 
