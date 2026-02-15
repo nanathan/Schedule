@@ -265,6 +265,53 @@ footer p {
   color: #3b5873;
 }
 
+.event-form-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #dce6f1;
+}
+
+.event-form-section h3 {
+  margin: 0 0 14px;
+}
+
+.event-form {
+  display: grid;
+  gap: 10px;
+}
+
+.event-form label {
+  font-weight: 600;
+  color: #2f4b65;
+}
+
+.event-form input,
+.event-form textarea {
+  font: inherit;
+  border: 1px solid #cad8e8;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.event-form input:focus,
+.event-form textarea:focus {
+  outline: 3px solid rgba(78, 137, 174, 0.22);
+  border-color: #4e89ae;
+}
+
+.event-form textarea {
+  resize: vertical;
+}
+
+.form-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2a6a6;
+  background: #fff1f1;
+  color: #8a2c2c;
+}
+
 @media (max-width: 700px) {
   .card {
     padding: 24px;
