@@ -59,18 +59,22 @@
                         </div>
                     </form>
                     {% else %}
-                    <p class="event-time">Starts {{ event.start }}</p>
-                    <h3>{{ event.title }}</h3>
-                    <p class="event-duration">Duration: {{ event.duration_minutes }} minutes</p>
-                    <p class="event-notes">{{ event.notes }}</p>
+                    <div class="event-item__layout">
+                        <div class="event-item__details">
+                            <p class="event-time">Starts {{ event.start }}</p>
+                            <h3>{{ event.title }}</h3>
+                            <p class="event-duration">Duration: {{ event.duration_minutes }} minutes</p>
+                            <p class="event-notes">{{ event.notes }}</p>
+                        </div>
 
-                    <div class="event-actions">
-                        <a href="{{ url_for('day_schedule', day=day, edit_event=event.id) }}" class="button secondary">Edit event</a>
-                        <form method="post" class="delete-form delete-form--inline">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="event_id" value="{{ event.id }}">
-                            <button type="submit" class="button danger">Delete event</button>
-                        </form>
+                        <div class="event-item__controls">
+                            <a href="{{ url_for('day_schedule', day=day, edit_event=event.id) }}" class="button secondary">Edit event</a>
+                            <form method="post" class="delete-form delete-form--inline">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="event_id" value="{{ event.id }}">
+                                <button type="submit" class="button danger">Delete event</button>
+                            </form>
+                        </div>
                     </div>
                     {% endif %}
                 </li>

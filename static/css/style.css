@@ -277,6 +277,30 @@ footer p {
   color: #3b5873;
 }
 
+
+.event-item__layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.event-item__details {
+  min-width: 0;
+  flex: 1;
+}
+
+.event-item__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.event-item__controls .delete-form {
+  margin-top: 0;
+}
 .event-form-section {
   margin-top: 24px;
   padding-top: 24px;
@@ -365,5 +389,14 @@ footer p {
 
   .calendar-day__meta {
     display: none;
+  }
+
+  .event-item__layout {
+    flex-direction: column;
+  }
+
+  .event-item__controls {
+    width: 100%;
+    align-items: flex-end;
   }
 }
