@@ -28,9 +28,36 @@
                 {% for event in events %}
                 <li class="event-item">
                     <p class="event-time">Starts {{ event.start }}</p>
-                    <h3>{{ event.title }}</h3>
-                    <p class="event-duration">Duration: {{ event.duration_minutes }} minutes</p>
-                    <p class="event-notes">{{ event.notes }}</p>
+                    <h3>Edit event</h3>
+                    <form method="post" class="event-form event-form--inline">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="event_index" value="{{ loop.index0 }}">
+
+                        <label for="event-title-{{ loop.index0 }}">Title</label>
+                        <input id="event-title-{{ loop.index0 }}" name="title" type="text" required value="{{ event.title }}">
+
+                        <label for="event-start-{{ loop.index0 }}">Start time</label>
+                        <input id="event-start-{{ loop.index0 }}" name="start" type="time" required value="{{ event.start }}">
+
+                        <label for="event-duration-{{ loop.index0 }}">Duration (minutes)</label>
+                        <input id="event-duration-{{ loop.index0 }}" name="duration_minutes" type="number" min="1" required value="{{ event.duration_minutes }}">
+
+                        <label for="event-notes-{{ loop.index0 }}">Notes</label>
+                        <textarea id="event-notes-{{ loop.index0 }}" name="notes" rows="3" placeholder="Optional details">{{ event.notes }}</textarea>
+
+                        <label for="event-day-{{ loop.index0 }}">Date</label>
+                        <input id="event-day-{{ loop.index0 }}" name="target_day" type="date" required value="{{ day }}">
+
+                        <div class="event-actions">
+                            <button type="submit" class="button primary">Save changes</button>
+                        </div>
+                    </form>
+
+                    <form method="post" class="delete-form">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="event_index" value="{{ loop.index0 }}">
+                        <button type="submit" class="button danger">Delete event</button>
+                    </form>
                 </li>
                 {% endfor %}
             </ul>

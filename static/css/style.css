@@ -63,6 +63,8 @@ body {
   border-radius: 999px;
   font-weight: 600;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  cursor: pointer;
 }
 
 .button:hover {
@@ -78,7 +80,17 @@ body {
 .button.secondary {
   border: 2px solid #43658b;
   color: #43658b;
+  background: #fff;
 }
+
+.button.danger {
+  background: #b04747;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(176, 71, 71, 0.22);
+  border: none;
+  cursor: pointer;
+}
+
 
 footer {
   height: 60px;
@@ -301,6 +313,20 @@ footer p {
 
 .event-form textarea {
   resize: vertical;
+}
+
+.event-form--inline {
+  margin-top: 8px;
+}
+
+.event-actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+}
+
+.delete-form {
+  margin-top: 10px;
 }
 
 .form-error {
