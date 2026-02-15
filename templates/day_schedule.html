@@ -20,9 +20,10 @@
         <section class="card">
             <div class="day-header">
                 <h2>Daily schedule</h2>
-                <a href="{{ url_for('home') }}" class="button secondary">Back home</a>
+                <a href="{{ url_for('home') }}" class="button secondary">Back to month view</a>
             </div>
 
+            {% if events %}
             <ul class="event-list" aria-label="Events for {{ day_label }}">
                 {% for event in events %}
                 <li class="event-item">
@@ -33,6 +34,9 @@
                 </li>
                 {% endfor %}
             </ul>
+            {% else %}
+            <p class="empty-state">No events are scheduled for this day yet.</p>
+            {% endif %}
         </section>
     </main>
 </div>

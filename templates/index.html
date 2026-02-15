@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule | Plan your day with ease</title>
+    <title>Schedule | Monthly calendar</title>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -12,31 +12,47 @@
     <header class="top">
         <div class="title">
             <h1>Schedule</h1>
-            <p>Personal task and event management for your everyday life.</p>
+            <p>Monthly calendar with searchable events and quick daily drill-down.</p>
         </div>
     </header>
 
     <main class="content">
-        <section class="card hero-card">
-            <h2>Organize tasks, events, and routines in one place.</h2>
-            <p class="text">
-                Stay focused with a simple workflow for tracking what matters most. Schedule helps you create tasks,
-                plan upcoming events, and keep your week under control.
-            </p>
-            <div class="cta-group">
-                <a href="{{ url_for('day_schedule', day=featured_day) }}" class="button primary">View today's schedule</a>
-                <a href="#features" class="button secondary">Learn more</a>
+        <section class="card">
+            <div class="calendar-header">
+                <a href="{{ url_for('home', year=previous_year, month=previous_month) }}" class="button secondary">← Previous month</a>
+                <h2>{{ month_label }}</h2>
+                <a href="{{ url_for('home', year=next_year, month=next_month) }}" class="button secondary">Next month →</a>
             </div>
-        </section>
 
-        <section class="card" id="features">
-            <h2>Why Schedule?</h2>
-            <ul class="feature-list">
-                <li>✅ Add and prioritize personal tasks quickly.</li>
-                <li>📅 Keep track of important events and deadlines.</li>
-                <li>🔔 Build a daily routine that fits your goals.</li>
-                <li>📱 Clean, responsive design for desktop and mobile.</li>
-            </ul>
+            <label for="calendar-search" class="search-label">Search events in this month</label>
+            <input id="calendar-search" class="search-input" type="search" placeholder="Type title or notes to highlight matching days..." autocomplete="off">
+
+            <p class="calendar-help">Days with events show a blue dot and event count. Click any day to view the full daily schedule.</p>
+
+            <div class="calendar-grid" role="grid" aria-label="Calendar for {{ month_label }}">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+
+                {% for day in days %}
+                <a
+                    href="{{ url_for('day_schedule', day=day.date) }}"
+                    class="calendar-day{% if not day.in_month %} calendar-day--muted{% endif %}{% if day.has_events %} calendar-day--has-events{% endif %}"
+                    data-search-text="{{ day.search_text }}"
+                    data-has-events="{{ 'true' if day.has_events else 'false' }}"
+                    aria-label="{{ day.date }}{% if day.has_events %}, {{ day.event_count }} event{{ 's' if day.event_count != 1 else '' }}{% endif %}"
+                >
+                    <span class="calendar-day__number">{{ day.day }}</span>
+                    {% if day.has_events %}
+                    <span class="calendar-day__meta">{{ day.event_count }} event{{ 's' if day.event_count != 1 else '' }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
         </section>
     </main>
 </div>
@@ -44,5 +60,29 @@
 <footer>
     <p>Built with Flask • Your day, planned better.</p>
 </footer>
+
+<script>
+    const searchInput = document.getElementById('calendar-search');
+    const dayCells = document.querySelectorAll('.calendar-day');
+
+    function applySearchHighlight() {
+        const query = searchInput.value.trim().toLowerCase();
+
+        dayCells.forEach((cell) => {
+            cell.classList.remove('calendar-day--search-match');
+            if (!query) {
+                return;
+            }
+
+            const hasEvents = cell.dataset.hasEvents === 'true';
+            const searchableText = cell.dataset.searchText || '';
+            if (hasEvents && searchableText.includes(query)) {
+                cell.classList.add('calendar-day--search-match');
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', applySearchHighlight);
+</script>
 </body>
 </html>
