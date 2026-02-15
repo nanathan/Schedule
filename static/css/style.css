@@ -320,13 +320,19 @@ footer p {
 }
 
 .event-actions {
-  margin-top: 4px;
+  margin-top: 10px;
   display: flex;
   gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .delete-form {
   margin-top: 10px;
+}
+
+.delete-form--inline {
+  margin-top: 0;
 }
 
 .form-error {

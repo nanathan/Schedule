@@ -125,6 +125,12 @@ def day_schedule(day):
 
     error_message = None
     form_values = {"title": "", "start": "", "duration_minutes": "", "notes": ""}
+    events = SAMPLE_SCHEDULE.get(day, [])
+
+    editing_event_index = flask.request.args.get("edit_event", type=int)
+    if editing_event_index is not None and (editing_event_index < 0 or editing_event_index >= len(events)):
+        editing_event_index = None
+    editing_form_values = None
 
     if flask.request.method == "POST":
         action = flask.request.form.get("action", "add")
@@ -143,6 +149,15 @@ def day_schedule(day):
             duration_input = flask.request.form.get("duration_minutes", "").strip()
             notes = flask.request.form.get("notes", "").strip()
             target_day = flask.request.form.get("target_day", day).strip()
+
+            editing_event_index = event_index
+            editing_form_values = {
+                "title": title,
+                "start": start,
+                "duration_minutes": duration_input,
+                "notes": notes,
+                "target_day": target_day,
+            }
 
             duration_minutes = parse_duration(duration_input)
 
@@ -208,6 +223,8 @@ def day_schedule(day):
         total_minutes=total_minutes,
         error_message=error_message,
         form_values=form_values,
+        editing_event_index=editing_event_index,
+        editing_form_values=editing_form_values,
     )
 
 

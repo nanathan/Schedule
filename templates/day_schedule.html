@@ -27,37 +27,52 @@
             <ul class="event-list" aria-label="Events for {{ day_label }}">
                 {% for event in events %}
                 <li class="event-item">
-                    <p class="event-time">Starts {{ event.start }}</p>
+                    {% if editing_event_index == loop.index0 %}
                     <h3>Edit event</h3>
+
+                    {% if error_message %}
+                    <p class="form-error" role="alert">{{ error_message }}</p>
+                    {% endif %}
+
                     <form method="post" class="event-form event-form--inline">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="event_index" value="{{ loop.index0 }}">
 
                         <label for="event-title-{{ loop.index0 }}">Title</label>
-                        <input id="event-title-{{ loop.index0 }}" name="title" type="text" required value="{{ event.title }}">
+                        <input id="event-title-{{ loop.index0 }}" name="title" type="text" required value="{{ editing_form_values.title if editing_form_values else event.title }}">
 
                         <label for="event-start-{{ loop.index0 }}">Start time</label>
-                        <input id="event-start-{{ loop.index0 }}" name="start" type="time" required value="{{ event.start }}">
+                        <input id="event-start-{{ loop.index0 }}" name="start" type="time" required value="{{ editing_form_values.start if editing_form_values else event.start }}">
 
                         <label for="event-duration-{{ loop.index0 }}">Duration (minutes)</label>
-                        <input id="event-duration-{{ loop.index0 }}" name="duration_minutes" type="number" min="1" required value="{{ event.duration_minutes }}">
+                        <input id="event-duration-{{ loop.index0 }}" name="duration_minutes" type="number" min="1" required value="{{ editing_form_values.duration_minutes if editing_form_values else event.duration_minutes }}">
 
                         <label for="event-notes-{{ loop.index0 }}">Notes</label>
-                        <textarea id="event-notes-{{ loop.index0 }}" name="notes" rows="3" placeholder="Optional details">{{ event.notes }}</textarea>
+                        <textarea id="event-notes-{{ loop.index0 }}" name="notes" rows="3" placeholder="Optional details">{{ editing_form_values.notes if editing_form_values else event.notes }}</textarea>
 
                         <label for="event-day-{{ loop.index0 }}">Date</label>
-                        <input id="event-day-{{ loop.index0 }}" name="target_day" type="date" required value="{{ day }}">
+                        <input id="event-day-{{ loop.index0 }}" name="target_day" type="date" required value="{{ editing_form_values.target_day if editing_form_values else day }}">
 
                         <div class="event-actions">
                             <button type="submit" class="button primary">Save changes</button>
+                            <a class="button secondary" href="{{ url_for('day_schedule', day=day) }}">Cancel</a>
                         </div>
                     </form>
+                    {% else %}
+                    <p class="event-time">Starts {{ event.start }}</p>
+                    <h3>{{ event.title }}</h3>
+                    <p class="event-duration">Duration: {{ event.duration_minutes }} minutes</p>
+                    <p class="event-notes">{{ event.notes }}</p>
 
-                    <form method="post" class="delete-form">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="event_index" value="{{ loop.index0 }}">
-                        <button type="submit" class="button danger">Delete event</button>
-                    </form>
+                    <div class="event-actions">
+                        <a href="{{ url_for('day_schedule', day=day, edit_event=loop.index0) }}" class="button secondary">Edit event</a>
+                        <form method="post" class="delete-form delete-form--inline">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="event_index" value="{{ loop.index0 }}">
+                            <button type="submit" class="button danger">Delete event</button>
+                        </form>
+                    </div>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
@@ -68,7 +83,7 @@
             <section class="event-form-section" aria-labelledby="add-event-heading">
                 <h3 id="add-event-heading">Add an event</h3>
 
-                {% if error_message %}
+                {% if error_message and editing_event_index is none %}
                 <p class="form-error" role="alert">{{ error_message }}</p>
                 {% endif %}
 
