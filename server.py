@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import uuid
 
 import flask
 
@@ -57,14 +58,33 @@ def parse_duration(duration_input):
 
 
 def add_event(day, event):
+    if "id" not in event or not event["id"]:
+        event["id"] = uuid.uuid4().hex
     SAMPLE_SCHEDULE.setdefault(day, []).append(event)
     SAMPLE_SCHEDULE[day].sort(key=lambda saved_event: saved_event["start"])
 
 
-def remove_event(day, event_index):
+def ensure_schedule_event_ids():
+    for events in SAMPLE_SCHEDULE.values():
+        for event in events:
+            if "id" not in event or not event["id"]:
+                event["id"] = uuid.uuid4().hex
+
+
+def find_event_index(day, event_id):
     events = SAMPLE_SCHEDULE.get(day, [])
-    if event_index < 0 or event_index >= len(events):
+    for event_index, event in enumerate(events):
+        if event["id"] == event_id:
+            return event_index
+    return None
+
+
+def remove_event(day, event_id):
+    event_index = find_event_index(day, event_id)
+    if event_index is None:
         return None
+
+    events = SAMPLE_SCHEDULE.get(day, [])
     removed_event = events.pop(event_index)
     if not events and day in SAMPLE_SCHEDULE:
         del SAMPLE_SCHEDULE[day]
@@ -106,6 +126,9 @@ def get_calendar_context(year, month):
     }
 
 
+ensure_schedule_event_ids()
+
+
 @app.route("/")
 def home():
     today = datetime.date.today()
@@ -127,30 +150,30 @@ def day_schedule(day):
     form_values = {"title": "", "start": "", "duration_minutes": "", "notes": ""}
     events = SAMPLE_SCHEDULE.get(day, [])
 
-    editing_event_index = flask.request.args.get("edit_event", type=int)
-    if editing_event_index is not None and (editing_event_index < 0 or editing_event_index >= len(events)):
-        editing_event_index = None
+    editing_event_id = flask.request.args.get("edit_event", type=str)
+    if editing_event_id is not None and find_event_index(day, editing_event_id) is None:
+        editing_event_id = None
     editing_form_values = None
 
     if flask.request.method == "POST":
         action = flask.request.form.get("action", "add")
 
         if action == "delete":
-            event_index = flask.request.form.get("event_index", type=int)
-            if event_index is None or remove_event(day, event_index) is None:
+            event_id = flask.request.form.get("event_id", "").strip()
+            if not event_id or remove_event(day, event_id) is None:
                 error_message = "Unable to delete that event."
             else:
                 return flask.redirect(flask.url_for("day_schedule", day=day))
 
         elif action == "update":
-            event_index = flask.request.form.get("event_index", type=int)
+            event_id = flask.request.form.get("event_id", "").strip()
             title = flask.request.form.get("title", "").strip()
             start = flask.request.form.get("start", "").strip()
             duration_input = flask.request.form.get("duration_minutes", "").strip()
             notes = flask.request.form.get("notes", "").strip()
             target_day = flask.request.form.get("target_day", day).strip()
 
-            editing_event_index = event_index
+            editing_event_id = event_id
             editing_form_values = {
                 "title": title,
                 "start": start,
@@ -169,12 +192,13 @@ def day_schedule(day):
                 error_message = "Please choose a valid date for this event."
             else:
                 updated_event = {
+                    "id": event_id,
                     "title": title,
                     "start": start,
                     "duration_minutes": duration_minutes,
                     "notes": notes,
                 }
-                removed_event = remove_event(day, event_index) if event_index is not None else None
+                removed_event = remove_event(day, event_id) if event_id else None
                 if removed_event is None:
                     error_message = "Unable to update that event."
                 else:
@@ -223,7 +247,7 @@ def day_schedule(day):
         total_minutes=total_minutes,
         error_message=error_message,
         form_values=form_values,
-        editing_event_index=editing_event_index,
+        editing_event_id=editing_event_id,
         editing_form_values=editing_form_values,
     )
 

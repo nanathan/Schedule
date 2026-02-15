@@ -27,7 +27,7 @@
             <ul class="event-list" aria-label="Events for {{ day_label }}">
                 {% for event in events %}
                 <li class="event-item">
-                    {% if editing_event_index == loop.index0 %}
+                    {% if editing_event_id == event.id %}
                     <h3>Edit event</h3>
 
                     {% if error_message %}
@@ -36,22 +36,22 @@
 
                     <form method="post" class="event-form event-form--inline">
                         <input type="hidden" name="action" value="update">
-                        <input type="hidden" name="event_index" value="{{ loop.index0 }}">
+                        <input type="hidden" name="event_id" value="{{ event.id }}">
 
-                        <label for="event-title-{{ loop.index0 }}">Title</label>
-                        <input id="event-title-{{ loop.index0 }}" name="title" type="text" required value="{{ editing_form_values.title if editing_form_values else event.title }}">
+                        <label for="event-title-{{ event.id }}">Title</label>
+                        <input id="event-title-{{ event.id }}" name="title" type="text" required value="{{ editing_form_values.title if editing_form_values else event.title }}">
 
-                        <label for="event-start-{{ loop.index0 }}">Start time</label>
-                        <input id="event-start-{{ loop.index0 }}" name="start" type="time" required value="{{ editing_form_values.start if editing_form_values else event.start }}">
+                        <label for="event-start-{{ event.id }}">Start time</label>
+                        <input id="event-start-{{ event.id }}" name="start" type="time" required value="{{ editing_form_values.start if editing_form_values else event.start }}">
 
-                        <label for="event-duration-{{ loop.index0 }}">Duration (minutes)</label>
-                        <input id="event-duration-{{ loop.index0 }}" name="duration_minutes" type="number" min="1" required value="{{ editing_form_values.duration_minutes if editing_form_values else event.duration_minutes }}">
+                        <label for="event-duration-{{ event.id }}">Duration (minutes)</label>
+                        <input id="event-duration-{{ event.id }}" name="duration_minutes" type="number" min="1" required value="{{ editing_form_values.duration_minutes if editing_form_values else event.duration_minutes }}">
 
-                        <label for="event-notes-{{ loop.index0 }}">Notes</label>
-                        <textarea id="event-notes-{{ loop.index0 }}" name="notes" rows="3" placeholder="Optional details">{{ editing_form_values.notes if editing_form_values else event.notes }}</textarea>
+                        <label for="event-notes-{{ event.id }}">Notes</label>
+                        <textarea id="event-notes-{{ event.id }}" name="notes" rows="3" placeholder="Optional details">{{ editing_form_values.notes if editing_form_values else event.notes }}</textarea>
 
-                        <label for="event-day-{{ loop.index0 }}">Date</label>
-                        <input id="event-day-{{ loop.index0 }}" name="target_day" type="date" required value="{{ editing_form_values.target_day if editing_form_values else day }}">
+                        <label for="event-day-{{ event.id }}">Date</label>
+                        <input id="event-day-{{ event.id }}" name="target_day" type="date" required value="{{ editing_form_values.target_day if editing_form_values else day }}">
 
                         <div class="event-actions">
                             <button type="submit" class="button primary">Save changes</button>
@@ -65,10 +65,10 @@
                     <p class="event-notes">{{ event.notes }}</p>
 
                     <div class="event-actions">
-                        <a href="{{ url_for('day_schedule', day=day, edit_event=loop.index0) }}" class="button secondary">Edit event</a>
+                        <a href="{{ url_for('day_schedule', day=day, edit_event=event.id) }}" class="button secondary">Edit event</a>
                         <form method="post" class="delete-form delete-form--inline">
                             <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="event_index" value="{{ loop.index0 }}">
+                            <input type="hidden" name="event_id" value="{{ event.id }}">
                             <button type="submit" class="button danger">Delete event</button>
                         </form>
                     </div>
@@ -83,7 +83,7 @@
             <section class="event-form-section" aria-labelledby="add-event-heading">
                 <h3 id="add-event-heading">Add an event</h3>
 
-                {% if error_message and editing_event_index is none %}
+                {% if error_message and editing_event_id is none %}
                 <p class="form-error" role="alert">{{ error_message }}</p>
                 {% endif %}
 
