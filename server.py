@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import uuid
 
 import flask
 
@@ -38,6 +39,58 @@ def format_day_label(day_string):
     return f"{parsed_day.strftime('%A, %B')} {parsed_day.day}, {parsed_day.year}"
 
 
+def parse_day(day_string):
+    try:
+        datetime.datetime.strptime(day_string, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return True
+
+
+def parse_duration(duration_input):
+    try:
+        duration_minutes = int(duration_input)
+        if duration_minutes <= 0:
+            raise ValueError
+    except ValueError:
+        return None
+    return duration_minutes
+
+
+def add_event(day, event):
+    if "id" not in event or not event["id"]:
+        event["id"] = uuid.uuid4().hex
+    SAMPLE_SCHEDULE.setdefault(day, []).append(event)
+    SAMPLE_SCHEDULE[day].sort(key=lambda saved_event: saved_event["start"])
+
+
+def ensure_schedule_event_ids():
+    for events in SAMPLE_SCHEDULE.values():
+        for event in events:
+            if "id" not in event or not event["id"]:
+                event["id"] = uuid.uuid4().hex
+
+
+def find_event_index(day, event_id):
+    events = SAMPLE_SCHEDULE.get(day, [])
+    for event_index, event in enumerate(events):
+        if event["id"] == event_id:
+            return event_index
+    return None
+
+
+def remove_event(day, event_id):
+    event_index = find_event_index(day, event_id)
+    if event_index is None:
+        return None
+
+    events = SAMPLE_SCHEDULE.get(day, [])
+    removed_event = events.pop(event_index)
+    if not events and day in SAMPLE_SCHEDULE:
+        del SAMPLE_SCHEDULE[day]
+    return removed_event
+
+
 def get_calendar_context(year, month):
     cal = calendar.Calendar(firstweekday=6)
     month_name = datetime.date(year, month, 1).strftime("%B %Y")
@@ -73,6 +126,9 @@ def get_calendar_context(year, month):
     }
 
 
+ensure_schedule_event_ids()
+
+
 @app.route("/")
 def home():
     today = datetime.date.today()
@@ -87,48 +143,99 @@ def home():
 
 @app.route("/schedule/<day>", methods=["GET", "POST"])
 def day_schedule(day):
-    try:
-        datetime.datetime.strptime(day, "%Y-%m-%d")
-    except ValueError:
+    if not parse_day(day):
         flask.abort(404)
 
     error_message = None
     form_values = {"title": "", "start": "", "duration_minutes": "", "notes": ""}
+    events = SAMPLE_SCHEDULE.get(day, [])
+
+    editing_event_id = flask.request.args.get("edit_event", type=str)
+    if editing_event_id is not None and find_event_index(day, editing_event_id) is None:
+        editing_event_id = None
+    editing_form_values = None
 
     if flask.request.method == "POST":
-        title = flask.request.form.get("title", "").strip()
-        start = flask.request.form.get("start", "").strip()
-        duration_input = flask.request.form.get("duration_minutes", "").strip()
-        notes = flask.request.form.get("notes", "").strip()
+        action = flask.request.form.get("action", "add")
 
-        form_values = {
-            "title": title,
-            "start": start,
-            "duration_minutes": duration_input,
-            "notes": notes,
-        }
+        if action == "delete":
+            event_id = flask.request.form.get("event_id", "").strip()
+            if not event_id or remove_event(day, event_id) is None:
+                error_message = "Unable to delete that event."
+            else:
+                return flask.redirect(flask.url_for("day_schedule", day=day))
 
-        try:
-            duration_minutes = int(duration_input)
-            if duration_minutes <= 0:
-                raise ValueError
-        except ValueError:
-            error_message = "Duration must be a positive number of minutes."
+        elif action == "update":
+            event_id = flask.request.form.get("event_id", "").strip()
+            title = flask.request.form.get("title", "").strip()
+            start = flask.request.form.get("start", "").strip()
+            duration_input = flask.request.form.get("duration_minutes", "").strip()
+            notes = flask.request.form.get("notes", "").strip()
+            target_day = flask.request.form.get("target_day", day).strip()
 
-        if not title or not start:
-            error_message = "Please fill in both title and start time."
+            editing_event_id = event_id
+            editing_form_values = {
+                "title": title,
+                "start": start,
+                "duration_minutes": duration_input,
+                "notes": notes,
+                "target_day": target_day,
+            }
 
-        if not error_message:
-            SAMPLE_SCHEDULE.setdefault(day, []).append(
-                {
+            duration_minutes = parse_duration(duration_input)
+
+            if not title or not start:
+                error_message = "Please fill in both title and start time."
+            elif duration_minutes is None:
+                error_message = "Duration must be a positive number of minutes."
+            elif not parse_day(target_day):
+                error_message = "Please choose a valid date for this event."
+            else:
+                updated_event = {
+                    "id": event_id,
                     "title": title,
                     "start": start,
                     "duration_minutes": duration_minutes,
                     "notes": notes,
                 }
-            )
-            SAMPLE_SCHEDULE[day].sort(key=lambda event: event["start"])
-            return flask.redirect(flask.url_for("day_schedule", day=day))
+                removed_event = remove_event(day, event_id) if event_id else None
+                if removed_event is None:
+                    error_message = "Unable to update that event."
+                else:
+                    add_event(target_day, updated_event)
+                    return flask.redirect(flask.url_for("day_schedule", day=target_day))
+
+        else:
+            title = flask.request.form.get("title", "").strip()
+            start = flask.request.form.get("start", "").strip()
+            duration_input = flask.request.form.get("duration_minutes", "").strip()
+            notes = flask.request.form.get("notes", "").strip()
+
+            form_values = {
+                "title": title,
+                "start": start,
+                "duration_minutes": duration_input,
+                "notes": notes,
+            }
+
+            duration_minutes = parse_duration(duration_input)
+
+            if not title or not start:
+                error_message = "Please fill in both title and start time."
+            elif duration_minutes is None:
+                error_message = "Duration must be a positive number of minutes."
+
+            if not error_message:
+                add_event(
+                    day,
+                    {
+                        "title": title,
+                        "start": start,
+                        "duration_minutes": duration_minutes,
+                        "notes": notes,
+                    },
+                )
+                return flask.redirect(flask.url_for("day_schedule", day=day))
 
     events = SAMPLE_SCHEDULE.get(day, [])
     total_minutes = sum(event["duration_minutes"] for event in events)
@@ -140,6 +247,8 @@ def day_schedule(day):
         total_minutes=total_minutes,
         error_message=error_message,
         form_values=form_values,
+        editing_event_id=editing_event_id,
+        editing_form_values=editing_form_values,
     )
 
 
