@@ -17,7 +17,8 @@ SAMPLE_SCHEDULE = {
 
 def format_day_label(day_string):
     parsed_day = datetime.datetime.strptime(day_string, "%Y-%m-%d")
-    return parsed_day.strftime("%A, %B %-d, %Y")
+    # Avoid %-d because it is unsupported by strftime on Windows.
+    return f"{parsed_day.strftime('%A, %B')} {parsed_day.day}, {parsed_day.year}"
 
 
 @app.route("/")
